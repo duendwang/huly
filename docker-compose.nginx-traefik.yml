@@ -1,12 +1,8 @@
 services:
   nginx:
     image: "nginx:1.21.3"
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     expose:
       - "80"
     labels:
@@ -23,12 +19,8 @@ services:
 
   mongodb:
     image: "mongo:7-jammy"
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
@@ -38,12 +30,8 @@ services:
 
   minio:
     image: "minio/minio"
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     command: server /data --address ":9000" --console-address ":9001"
     volumes:
       - files:/data
@@ -51,17 +39,8 @@ services:
 
   elastic:
     image: "elasticsearch:7.14.2"
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
-    command: |
-      /bin/sh -c "./bin/elasticsearch-plugin list | grep -q ingest-attachment || yes | ./bin/elasticsearch-plugin install --silent ingest-attachment;
-      /usr/local/bin/docker-entrypoint.sh eswrapper"
-    volumes:
-      - elastic:/usr/share/elasticsearch/data
     environment:
       - ELASTICSEARCH_PORT_NUMBER=9200
       - BITNAMI_DEBUG=true
@@ -74,15 +53,16 @@ services:
       retries: 10
       test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
     restart: unless-stopped
+    command: |
+      /bin/sh -c "./bin/elasticsearch-plugin list | grep -q ingest-attachment || yes | ./bin/elasticsearch-plugin install --silent ingest-attachment;
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
 
   rekoni:
     image: hardcoreeng/rekoni-service:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - SECRET=${HULY_SECRET}
     deploy:
@@ -93,12 +73,8 @@ services:
 
   transactor:
     image: hardcoreeng/transactor:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - SERVER_PORT=3333
       - SERVER_SECRET=${HULY_SECRET}
@@ -115,12 +91,8 @@ services:
 
   collaborator:
     image: hardcoreeng/collaborator:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - COLLABORATOR_PORT=3078
       - SECRET=${HULY_SECRET}
@@ -132,12 +104,8 @@ services:
 
   account:
     image: hardcoreeng/account:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - SERVER_PORT=3000
       - SERVER_SECRET=${HULY_SECRET}
@@ -154,12 +122,8 @@ services:
 
   workspace:
     image: hardcoreeng/workspace:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - SERVER_SECRET=${HULY_SECRET}
       - DB_URL=mongodb://mongodb:27017
@@ -173,12 +137,8 @@ services:
 
   front:
     image: hardcoreeng/front:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - SERVER_PORT=8080
       - SERVER_SECRET=${HULY_SECRET}
@@ -203,12 +163,8 @@ services:
 
   fulltext:
     image: hardcoreeng/fulltext:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - SERVER_SECRET=${HULY_SECRET}
       - DB_URL=mongodb://mongodb:27017
@@ -222,12 +178,8 @@ services:
 
   stats:
     image: hardcoreeng/stats:${HULY_VERSION}
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - PORT=4900
       - SERVER_SECRET=${HULY_SECRET}
