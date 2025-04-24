@@ -10,14 +10,9 @@ x-common-env: &common-env
 services:
   mongodb:
     image: mongo:7-jammy
-    container_name: mongodb
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
@@ -29,12 +24,8 @@ services:
   minio:
     image: minio/minio
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     command: server /data --address ":9000" --console-address ":9001"
     volumes:
       - files:/data
@@ -44,17 +35,8 @@ services:
   elastic:
     image: elasticsearch:7.14.2
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
-    command: |
-      /bin/sh -c "./bin/elasticsearch-plugin list | grep -q ingest-attachment || yes | ./bin/elasticsearch-plugin install --silent ingest-attachment;
-      /usr/local/bin/docker-entrypoint.sh eswrapper"
-    volumes:
-      - elastic:/usr/share/elasticsearch/data
     environment:
       - ELASTICSEARCH_PORT_NUMBER=9200
       - BITNAMI_DEBUG=true
@@ -66,18 +48,19 @@ services:
       interval: 20s
       retries: 10
       test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+    command: |
+      /bin/sh -c "./bin/elasticsearch-plugin list | grep -q ingest-attachment || yes | ./bin/elasticsearch-plugin install --silent ingest-attachment;
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
     networks:
       - default
 
   rekoni:
     image: hardcoreeng/rekoni-service:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
     deploy:
@@ -100,12 +83,8 @@ services:
   transactor:
     image: hardcoreeng/transactor:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       SERVER_PORT: 3333
@@ -144,12 +123,8 @@ services:
   collaborator:
     image: hardcoreeng/collaborator:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       COLLABORATOR_PORT: 3078
@@ -183,12 +158,8 @@ services:
   account:
     image: hardcoreeng/account:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       SERVER_PORT: 3000
@@ -212,12 +183,8 @@ services:
   workspace:
     image: hardcoreeng/workspace:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       TRANSACTOR_URL: ws://transactor:3333;wss://${DOMAIN}/ws/transactor
@@ -228,12 +195,8 @@ services:
   front:
     image: hardcoreeng/front:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       SERVER_PORT: 8080
@@ -264,12 +227,8 @@ services:
   fulltext:
     image: hardcoreeng/fulltext:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       FULLTEXT_DB_URL: http://elastic:9200
@@ -281,12 +240,8 @@ services:
   stats:
     image: hardcoreeng/stats:${HULY_VERSION}
     restart: unless-stopped
-    user: ${PUID:-1000}:${PGID:-1000}
     security_opt:
       - "no-new-privileges:true"
-    cap_drop:
-      - SETUID
-      - SETGID
     environment:
       <<: *common-env
       PORT: 4900
